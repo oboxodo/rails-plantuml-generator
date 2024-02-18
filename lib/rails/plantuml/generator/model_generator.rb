@@ -87,7 +87,7 @@ module Rails
             columns -= parent.columns_hash.keys if class_relevant? parent
 
             columns.each do |column|
-              io.puts "    #{column}"
+              io.puts "    #{column} : #{clazz.columns_hash[column].type}"
             end
           end
 
