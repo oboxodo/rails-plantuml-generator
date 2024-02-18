@@ -84,7 +84,7 @@ module Rails
 
           unless clazz.abstract_class
             columns = clazz.columns_hash.keys
-            columns -= parent.columns_hash.keys if class_relevant? parent
+            columns -= parent.columns_hash.keys if class_relevant?(parent) && !parent.abstract_class
 
             columns.each do |column|
               io.puts "    #{column} : #{clazz.columns_hash[column].type}"
