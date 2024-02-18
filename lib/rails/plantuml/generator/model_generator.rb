@@ -63,6 +63,11 @@ module Rails
 
         def write_to_io(io)
           io.puts '@startuml'
+          io.puts
+
+          io.puts 'hide circle'
+          io.puts 'hide empty members'
+          io.puts
 
           @models.each do |model|
             write_class model, io
