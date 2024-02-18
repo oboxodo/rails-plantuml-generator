@@ -2,6 +2,13 @@ module Rails
   module Plantuml
     module Generator
       class ModelGenerator
+        RESERVED_WORDS = %w[
+          class
+          interface
+          package
+          state
+        ].freeze
+
         def initialize(models, whitelist_regex, highlight_regex: nil)
           @whitelist_regex = Regexp.new whitelist_regex if whitelist_regex
           @highlight_regex = Regexp.new highlight_regex if highlight_regex
@@ -22,7 +29,12 @@ module Rails
         end
 
         def class_name(clazz)
-          clazz.name
+          clazz_name = clazz.name
+          reserved_word?(clazz_name) ? %("#{clazz_name}") : clazz_name
+        end
+
+        def reserved_word?(word)
+          RESERVED_WORDS.include?(word.downcase)
         end
 
         def determine_associations(models)
