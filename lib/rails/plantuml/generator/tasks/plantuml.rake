@@ -14,7 +14,7 @@ namespace :plantuml do
     Rails.application.eager_load!
     models = ActiveRecord::Base.descendants
 
-    generator = Rails::Plantuml::Generator::ModelGenerator.new models, args[:whitelist]
+    generator = Rails::Plantuml::Generator::ModelGenerator.new models, args[:whitelist], highlight_regex: ENV["HIGHLIGHT"]
 
     File.open OUTPUT_FILE, 'w' do |file|
       generator.write_to_io file

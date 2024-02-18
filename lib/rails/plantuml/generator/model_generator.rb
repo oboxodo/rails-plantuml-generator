@@ -2,8 +2,9 @@ module Rails
   module Plantuml
     module Generator
       class ModelGenerator
-        def initialize(models, whitelist_regex)
+        def initialize(models, whitelist_regex, highlight_regex: nil)
           @whitelist_regex = Regexp.new whitelist_regex if whitelist_regex
+          @highlight_regex = Regexp.new highlight_regex if highlight_regex
           @models = models.select { |m| class_relevant? m }
 
           @associations_hash = determine_associations @models
@@ -13,6 +14,11 @@ module Rails
           return false unless clazz < ((defined? ApplicationRecord).present? ? ApplicationRecord : ActiveRecord::Base)
           return true unless @whitelist_regex
           !@whitelist_regex.match(clazz.name).nil?
+        end
+
+        def should_highlight?(clazz)
+          return false unless @highlight_regex
+          !!@highlight_regex.match(clazz.name)
         end
 
         def class_name(clazz)
@@ -85,6 +91,7 @@ module Rails
 
           io.write "class #{class_name clazz} "
           io.write "extends #{class_name parent}" if class_relevant? parent
+          io.write " #yellow" if should_highlight?(clazz)
           io.puts " {"
 
           unless clazz.abstract_class
