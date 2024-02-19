@@ -85,6 +85,11 @@ module Rails
           result
         end
 
+        def level_color(level)
+          ratio = [(3 + 8 * level), 40].min
+          %(%darken("white", #{ratio}))
+        end
+
         def write_to_io(io)
           io.puts '@startuml'
           io.puts
@@ -113,7 +118,7 @@ module Rails
           prefix = "  " * level
           package_alias = [base, name].compact.join(".")
 
-          io.write %(#{prefix}package "#{name}" as #{package_alias} {)
+          io.write %(#{prefix}package "#{name}" as #{package_alias} #{level_color(level)} {)
           io.puts if subs.any?
           subs.each do |k, value|
             write_package k, value, package_alias, level + 1, io
