@@ -14,6 +14,12 @@ module Rails
           @highlight_regex = Regexp.new highlight_regex if highlight_regex
           @models = models.select { |m| class_relevant? m }
 
+          @packages = Hash.new { |h, k| h[k] = Hash.new(&h.default_proc) }
+          @models.each do |model|
+            path = model.name.split("::")[0..-2]
+            @packages.dig(*path) if path.any?
+          end
+
           @associations_hash = determine_associations @models
         end
 
@@ -29,7 +35,7 @@ module Rails
         end
 
         def class_name(clazz)
-          clazz_name = clazz.name
+          clazz_name = clazz.name.gsub("::", ".")
           reserved_word?(clazz_name) ? %("#{clazz_name}") : clazz_name
         end
 
@@ -87,6 +93,11 @@ module Rails
           io.puts 'hide empty members'
           io.puts
 
+          @packages.each do |name, subs|
+            write_package name, subs, nil, 0, io
+            io.puts
+          end
+
           @models.each do |model|
             write_class model, io
             io.puts
@@ -96,6 +107,19 @@ module Rails
           io.puts
 
           io.puts '@enduml'
+        end
+
+        def write_package(name, subs, base, level, io)
+          prefix = "  " * level
+          package_alias = [base, name].compact.join(".")
+
+          io.write %(#{prefix}package "#{name}" as #{package_alias} {)
+          io.puts if subs.any?
+          subs.each do |k, value|
+            write_package k, value, package_alias, level + 1, io
+          end
+          io.write prefix if subs.any?
+          io.puts "}"
         end
 
         def write_class(clazz, io)
